@@ -74,6 +74,7 @@ async function init() {
     }
     initSchema();
     persist();
+    console.log(`Database file: ${DB_PATH}`);
   })();
   await initPromise;
 }
@@ -131,6 +132,16 @@ function saveCheckIn(dateKey, entry) {
   return { id, dateKey, submittedAt };
 }
 
+function deleteDay(dateKey) {
+  const delCheckIns = db.prepare('DELETE FROM check_ins WHERE date_key = ?');
+  delCheckIns.run([dateKey]);
+  delCheckIns.free();
+  const delCheckOuts = db.prepare('DELETE FROM check_outs WHERE date_key = ?');
+  delCheckOuts.run([dateKey]);
+  delCheckOuts.free();
+  persist();
+}
+
 function saveCheckOut(dateKey, entry) {
   const id = randomUUID();
   const submittedAt = new Date().toISOString();
@@ -156,4 +167,5 @@ module.exports = {
   getDayData,
   saveCheckIn,
   saveCheckOut,
+  deleteDay,
 };

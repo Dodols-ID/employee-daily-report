@@ -7,6 +7,8 @@
   const modalTitle = document.getElementById('modal-title');
   const modalCheckin = document.getElementById('modal-checkin');
   const modalCheckout = document.getElementById('modal-checkout');
+  const modalDelete = document.getElementById('modal-delete');
+  let activeDateKey = null;
 
   function sortDates(dates, order) {
     const sorted = [...dates].sort();
@@ -52,6 +54,7 @@
   }
 
   async function openModal(dateKey) {
+    activeDateKey = dateKey;
     const data = await getDayData(dateKey);
     modalTitle.textContent = `${formatDisplayDate(dateKey)} Report`;
 
@@ -72,6 +75,26 @@
   function closeModal() {
     modalOverlay.classList.add('hidden');
     document.body.style.overflow = '';
+    activeDateKey = null;
+  }
+
+  async function deleteActiveDate() {
+    if (!activeDateKey) return;
+    const label = formatDisplayDate(activeDateKey);
+    const confirmed = confirm(
+      `Delete all check-in and check-out data for ${label}? This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    try {
+      await deleteDay(activeDateKey);
+    } catch {
+      alert('Could not delete this date. Is the server running?');
+      return;
+    }
+
+    closeModal();
+    await renderDateList();
   }
 
   async function renderDateList() {
@@ -110,6 +133,7 @@
 
   sortOrder.addEventListener('change', renderDateList);
   modalClose.addEventListener('click', closeModal);
+  modalDelete.addEventListener('click', deleteActiveDate);
   modalOverlay.addEventListener('click', (e) => {
     if (e.target === modalOverlay) closeModal();
   });

@@ -17,6 +17,11 @@ app.get('/api/days/:dateKey', (req, res) => {
   res.json(db.getDayData(req.params.dateKey));
 });
 
+app.delete('/api/days/:dateKey', (req, res) => {
+  db.deleteDay(req.params.dateKey);
+  res.status(204).end();
+});
+
 app.post('/api/check-ins', (req, res) => {
   const { dateKey, internName, workItems } = req.body;
   if (!dateKey || !internName || !Array.isArray(workItems)) {

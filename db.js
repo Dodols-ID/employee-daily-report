@@ -36,6 +36,7 @@ async function apiJson(url, options = {}) {
     const text = await res.text();
     throw new Error(text || res.statusText);
   }
+  if (res.status === 204) return null;
   return res.json();
 }
 
@@ -71,4 +72,10 @@ async function getAllDateKeys() {
 
 async function getDayData(dateKey) {
   return apiJson(`${API_BASE}/days/${encodeURIComponent(dateKey)}`);
+}
+
+async function deleteDay(dateKey) {
+  return apiJson(`${API_BASE}/days/${encodeURIComponent(dateKey)}`, {
+    method: 'DELETE',
+  });
 }
