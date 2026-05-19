@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home — Daily Intern Report</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="index.html" class="nav-link active">Home</a>
+      <a href="check-in.html" class="nav-link">Check-in</a>
+      <a href="check-out.html" class="nav-link">Check-out</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h1>Gesellschaft</h1>
+    <p class="subtitle">Select a date to view check-in and check-out details.</p>
+
+    <div class="toolbar">
+      <label for="sort-order">Sort by date</label>
+      <select id="sort-order" aria-label="Sort dates">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+      </select>
+    </div>
+
+    <ul id="date-list" class="date-list" aria-live="polite"></ul>
+    <p id="empty-state" class="empty-state hidden">No reports yet. Submit a check-in or check-out to get started.</p>
+  </main>
+
+  <div id="modal-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <button type="button" class="modal-close" id="modal-close" aria-label="Close report">&times;</button>
+      <h2 id="modal-title" class="modal-title"></h2>
+      <div class="modal-columns">
+        <section class="modal-column" aria-labelledby="checkin-heading">
+          <h3 id="checkin-heading">Check-in</h3>
+          <div id="modal-checkin" class="modal-content"></div>
+        </section>
+        <section class="modal-column" aria-labelledby="checkout-heading">
+          <h3 id="checkout-heading">Check-out</h3>
+          <div id="modal-checkout" class="modal-content"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script src="db.js"></script>
+  <script src="home.js"></script>
+</body>
+</html>

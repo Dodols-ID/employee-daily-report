@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Check-out — Daily Intern Report</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="check-in.html" class="nav-link">Check-in</a>
+      <a href="check-out.html" class="nav-link active">Check-out</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h1>End-of-day Check-out</h1>
+    <p class="subtitle">Summarize your day before you leave.</p>
+
+    <form id="checkout-form" class="form">
+      <div class="form-group">
+        <label for="intern-name">Intern name</label>
+        <input type="text" id="intern-name" name="internName" required placeholder="Your full name">
+      </div>
+
+      <div class="form-group">
+        <label for="done">What got done?</label>
+        <textarea id="done" name="done" required rows="4" placeholder="List accomplishments from today"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="blocked">What blocked progress?</label>
+        <textarea id="blocked" name="blocked" required rows="4" placeholder="Blockers, dependencies, or issues"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="notes">Notes for tomorrow's intern</label>
+        <textarea id="notes" name="notes" required rows="4" placeholder="Handoff notes for whoever continues this work"></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Submit check-out</button>
+    </form>
+
+    <p id="checkout-message" class="form-message hidden" role="status"></p>
+  </main>
+
+  <script src="db.js"></script>
+  <script src="check-out.js"></script>
+</body>
+</html>

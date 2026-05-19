@@ -1,0 +1,14 @@
+{
+  "name": "employee-daily-report",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Intern daily check-in and check-out reports",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "sql.js": "^1.13.0"
+  }
+}
