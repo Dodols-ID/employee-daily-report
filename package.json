@@ -1,14 +1,14 @@
 {
   "name": "employee-daily-report",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Intern daily check-in and check-out reports",
-  "main": "server.js",
+  "description": "Intern daily check-in, check-out, and kanban reports (Supabase + GitHub Pages)",
   "scripts": {
-    "start": "node server.js"
+    "serve": "npx serve . -l 3000",
+    "migrate": "node scripts/migrate-local-to-supabase.js"
   },
   "dependencies": {
-    "express": "^5.1.0",
+    "@supabase/supabase-js": "^2.49.8",
     "sql.js": "^1.13.0"
   }
 }

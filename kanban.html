@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kanban — Daily Intern Report</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="kanban-body">
+  <header class="site-header">
+    <nav class="nav nav-wide">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="check-in.html" class="nav-link">Check-in</a>
+      <a href="check-out.html" class="nav-link">Check-out</a>
+      <a href="kanban.html" class="nav-link active">Kanban</a>
+      <a href="calendar.html" class="nav-link">Calendar</a>
+    </nav>
+  </header>
+
+  <main class="kanban-page">
+    <h1>Task Board</h1>
+    <p class="subtitle">Drag tasks between columns. Overdue tasks are highlighted in red.</p>
+
+    <div class="kanban-board" id="kanban-board">
+      <section class="kanban-column" data-status="Current" aria-labelledby="col-current-title">
+        <h2 id="col-current-title" class="kanban-column-title">Current</h2>
+        <div class="kanban-cards" id="col-current" data-status="Current"></div>
+      </section>
+      <section class="kanban-column" data-status="Urgent" aria-labelledby="col-urgent-title">
+        <h2 id="col-urgent-title" class="kanban-column-title kanban-column-title--urgent">Urgent</h2>
+        <div class="kanban-cards" id="col-urgent" data-status="Urgent"></div>
+      </section>
+      <section class="kanban-column" data-status="Waiting" aria-labelledby="col-waiting-title">
+        <h2 id="col-waiting-title" class="kanban-column-title kanban-column-title--waiting">Waiting</h2>
+        <div class="kanban-cards" id="col-waiting" data-status="Waiting"></div>
+      </section>
+    </div>
+  </main>
+
+  <aside class="kanban-dock" aria-label="Add tasks">
+    <button type="button" id="dock-toggle" class="kanban-dock-toggle" aria-expanded="false" aria-controls="kanban-add-panel">
+      + Add tasks
+    </button>
+    <div id="kanban-add-panel" class="kanban-add-panel hidden">
+      <h2 class="kanban-add-title">New tasks</h2>
+      <form id="kanban-add-form" class="kanban-add-form">
+        <div id="task-rows" class="task-rows"></div>
+        <button type="button" id="add-work" class="btn btn-secondary">+ Work</button>
+        <button type="submit" class="btn btn-primary">Add tasks to board</button>
+      </form>
+      <p id="kanban-add-message" class="form-message hidden" role="status"></p>
+    </div>
+  </aside>
+
+  <div id="task-modal-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="task-modal-title">
+    <div class="modal modal--task">
+      <button type="button" class="modal-close" id="task-modal-close" aria-label="Close task">&times;</button>
+      <h2 id="task-modal-title" class="modal-title"></h2>
+      <div id="task-modal-body" class="task-modal-body"></div>
+      <div class="modal-actions">
+        <button type="button" id="task-modal-delete" class="btn-delete">Delete task</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="db.js"></script>
+  <script src="kanban.js"></script>
+</body>
+</html>

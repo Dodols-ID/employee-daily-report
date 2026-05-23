@@ -8,10 +8,12 @@
 </head>
 <body>
   <header class="site-header">
-    <nav class="nav">
+    <nav class="nav nav-wide">
       <a href="index.html" class="nav-link">Home</a>
       <a href="check-in.html" class="nav-link active">Check-in</a>
       <a href="check-out.html" class="nav-link">Check-out</a>
+      <a href="kanban.html" class="nav-link">Kanban</a>
+      <a href="calendar.html" class="nav-link">Calendar</a>
     </nav>
   </header>
 
@@ -31,7 +33,7 @@
           <div class="work-row" data-row="0">
             <div class="form-group">
               <label for="dept-goal-0">Department — goal</label>
-              <input type="text" id="dept-goal-0" name="deptGoal[]" required placeholder="e.g. Engineering — Build login page">
+              <input type="text" id="dept-goal-0" name="deptGoal[]" required placeholder="e.g. Humanity - Deal with Reality">
             </div>
           </div>
         </div>
@@ -44,6 +46,8 @@
     <p id="checkin-message" class="form-message hidden" role="status"></p>
   </main>
 
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="db.js"></script>
   <script src="check-in.js"></script>
 </body>

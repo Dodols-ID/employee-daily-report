@@ -15,7 +15,7 @@
     try {
       await saveCheckOut(entry);
     } catch {
-      messageEl.textContent = 'Could not save check-out. Is the server running?';
+      messageEl.textContent = 'Could not save check-out. Check config.js and Supabase setup.';
       messageEl.classList.remove('hidden');
       return;
     }

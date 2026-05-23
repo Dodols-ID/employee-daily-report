@@ -43,6 +43,10 @@ body {
   gap: 0.25rem;
 }
 
+.nav-wide {
+  max-width: 1200px;
+}
+
 .nav-link {
   padding: 1rem 1.25rem;
   text-decoration: none;
@@ -420,6 +424,390 @@ h1 {
   margin: 0;
 }
 
+/* Kanban */
+.kanban-body {
+  padding-bottom: 5rem;
+}
+
+.kanban-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+}
+
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  align-items: start;
+  min-height: 420px;
+}
+
+.kanban-column {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.kanban-column--drop-target {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.kanban-column-title {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  font-size: 1rem;
+  border-bottom: 1px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.kanban-column-title--urgent {
+  color: #b45309;
+}
+
+.kanban-column-title--waiting {
+  color: var(--muted);
+}
+
+.kanban-cards {
+  flex: 1;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  min-height: 120px;
+}
+
+.kanban-empty {
+  margin: 0;
+  padding: 1rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.kanban-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  cursor: grab;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.kanban-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.1);
+}
+
+.kanban-card--overdue {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+
+.kanban-card--overdue:hover {
+  border-color: #ef4444;
+}
+
+.kanban-card--dragging {
+  opacity: 0.55;
+  cursor: grabbing;
+}
+
+.kanban-card-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.kanban-card-due {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.kanban-card--overdue .kanban-card-due {
+  color: #b91c1c;
+}
+
+.kanban-card-meta {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.kanban-dock {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+  max-width: min(420px, calc(100vw - 2rem));
+}
+
+.kanban-dock-toggle {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.kanban-dock-toggle:hover {
+  background: var(--primary-hover);
+}
+
+.kanban-add-panel {
+  width: 100%;
+  max-height: 70vh;
+  overflow: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.25rem;
+}
+
+.kanban-add-title {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+}
+
+.kanban-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.task-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.task-row {
+  position: relative;
+  padding: 1rem;
+  padding-right: 2.25rem;
+  background: var(--bg);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.task-row .form-group select,
+.kanban-add-form .form-group select {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+  background: var(--surface);
+}
+
+.modal--task {
+  width: min(480px, 100%);
+}
+
+.task-modal-body {
+  padding: 1.25rem 1.5rem;
+}
+
+.task-detail-dl {
+  margin: 0;
+}
+
+.task-detail-dl dt {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 1rem;
+}
+
+.task-detail-dl dt:first-child {
+  margin-top: 0;
+}
+
+.task-detail-dl dd {
+  margin: 0.35rem 0 0;
+  font-size: 0.95rem;
+}
+
+.task-detail-primary {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.task-detail-dl--overdue .task-detail-primary {
+  color: #b91c1c;
+}
+
+.task-overdue-badge {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  background: #dc2626;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  margin-left: 0.35rem;
+}
+
+/* Calendar */
+.calendar-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+}
+
+.calendar-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.calendar-month-label {
+  margin: 0;
+  flex: 1;
+  min-width: 180px;
+  font-size: 1.35rem;
+}
+
+.calendar-grid {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.calendar-weekdays span {
+  padding: 0.65rem 0.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-day {
+  min-height: 110px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 0.45rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  background: var(--surface);
+}
+
+.calendar-day:nth-child(7n) {
+  border-right: none;
+}
+
+.calendar-day--outside {
+  background: #f8fafc;
+}
+
+.calendar-day--today {
+  background: #eff6ff;
+}
+
+.calendar-day--today .calendar-day-number {
+  color: var(--primary);
+}
+
+.calendar-day--has-overdue {
+  box-shadow: inset 0 0 0 1px #fecaca;
+}
+
+.calendar-day-number {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.calendar-day-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  overflow: hidden;
+}
+
+.calendar-task-chip {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 0.35rem 0.45rem;
+  cursor: pointer;
+  font: inherit;
+}
+
+.calendar-task-chip:hover {
+  border-color: var(--primary);
+}
+
+.calendar-task-chip--overdue {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+
+.calendar-task-title {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calendar-task-meta {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 900px) {
+  .kanban-board {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 640px) {
   .modal-columns {
     grid-template-columns: 1fr;
@@ -428,5 +816,11 @@ h1 {
   .modal-column:first-child {
     border-right: none;
     border-bottom: 1px solid var(--border);
+  }
+
+  .kanban-dock {
+    right: 0.75rem;
+    bottom: 0.75rem;
+    max-width: calc(100vw - 1.5rem);
   }
 }

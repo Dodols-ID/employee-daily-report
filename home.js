@@ -89,7 +89,7 @@
     try {
       await deleteDay(activeDateKey);
     } catch {
-      alert('Could not delete this date. Is the server running?');
+      alert('Could not delete this date. Check your Supabase connection.');
       return;
     }
 
@@ -103,7 +103,7 @@
       dates = await getAllDateKeys();
     } catch {
       dateList.innerHTML = '';
-      emptyState.textContent = 'Could not load reports. Is the server running?';
+      emptyState.textContent = 'Could not load reports. Check config.js and Supabase setup.';
       emptyState.classList.remove('hidden');
       return;
     }

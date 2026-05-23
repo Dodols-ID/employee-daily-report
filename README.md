@@ -1,61 +1,87 @@
 # Employee Daily Check-in / Check-out Report
 
-A simple website for intern daily check-in and check-out reports. Data is stored in a local **SQLite** database file (`reports.db`) in this folder.
+A static web app for intern daily reports and a kanban task board. **All data is stored in [Supabase](https://supabase.com)** so the site works online on **GitHub Pages** from any device.
 
 ## Pages
 
-- **Home** (`index.html`) — Lists all dates with submissions, sortable newest/oldest. Click a date to open a report modal; use **Delete this date** to remove all check-ins and check-outs for that day.
-- **Check-in** (`check-in.html`) — Intern name, department/goal pairs (add more with **+ Work**).
-- **Check-out** (`check-out.html`) — What got done, blockers, and notes for tomorrow.
+- **Home** — Daily check-in / check-out reports by date
+- **Check-in** — Morning department goals
+- **Check-out** — End-of-day summary
+- **Kanban** — Current / Urgent / Waiting columns with drag-and-drop
+- **Calendar** — Month view of kanban tasks by due date
 
-## Run locally
+## Setup (one time)
 
-Install dependencies and start the server:
+### 1. Create a Supabase project
+
+1. Sign up at [supabase.com](https://supabase.com) and create a project.
+2. Open **SQL Editor** and run the full script in [`supabase/schema.sql`](supabase/schema.sql).
+3. In **Project Settings → API**, copy:
+   - **Project URL**
+   - **anon public** key (safe for the browser)
+
+### 2. Local config
+
+```bash
+copy config.example.js config.js
+```
+
+Edit `config.js` with your Supabase URL and anon key.
+
+### 3. Migrate existing local SQLite data (optional)
+
+If you have an old `reports.db` from the previous local-server version:
 
 ```bash
 npm install
-npm start
+set SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+set SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+npm run migrate
 ```
 
-Your default browser opens to [http://localhost:3000](http://localhost:3000) automatically. On Windows you can also double-click `start.bat`.
+Use the **service role** key only for this one-time migration (never commit it or put it in the website).
 
-To skip auto-open: `set NO_OPEN_BROWSER=1` then `npm start`.
+### 4. Run locally
 
-## Where data is stored
+Double-click **`start.bat`** or:
 
-All reports live in **`reports.db`** in this project folder (same folder as `server.js`):
-
-```
-c:\Users\loren\employee-daily-report\reports.db
+```bash
+npm run serve
 ```
 
-The file is created the first time you run **`start.bat`** or **`npm start`** (when the server starts), not when you run `npm install`. You must use the server at `http://localhost:3000` — opening HTML files directly (`file://`) will not read or write this database.
+Open [http://localhost:3000](http://localhost:3000). Data reads/writes go to Supabase, not your PC.
 
-When the server starts, the console prints the full path to the database file.
+## Deploy to GitHub Pages
 
-## Data structure
+1. Push this repo to GitHub.
+2. In the repo **Settings → Secrets and variables → Actions**, add:
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+3. In **Settings → Pages**, set **Source** to **GitHub Actions**.
+4. Push to `main` (or `master`). The workflow in [`.github/workflows/pages.yml`](.github/workflows/pages.yml) builds `config.js` from secrets and deploys the static site.
 
-Reports are keyed by date (`YYYY-MM-DD`). Each date has:
+Your site will be at `https://<username>.github.io/<repo-name>/`.
 
-- `checkIns[]` — intern name, work items (department + goal), submission timestamp
-- `checkOuts[]` — intern name, done/blocked/notes, submission timestamp
+## Data structure (Supabase)
 
-The API mirrors this shape:
+| Table | Purpose |
+|-------|---------|
+| `check_ins` | Daily check-ins (`date_key`, `intern_name`, `work_items` JSON) |
+| `check_outs` | Daily check-outs (`done`, `blocked`, `notes`) |
+| `kanban_tasks` | Tasks (`title`, `due_date`, `status`, `department`) |
 
-- `GET /api/dates` — list of date keys
-- `GET /api/days/:dateKey` — `{ checkIns, checkOuts }` for one date
-- `POST /api/check-ins` — body: `{ dateKey, internName, workItems }`
-- `POST /api/check-outs` — body: `{ dateKey, internName, done, blocked, notes }`
-- `DELETE /api/days/:dateKey` — removes all check-ins and check-outs for that date
+Row-level security is open for read/write (suitable for a small internal team). For production, add Supabase Auth and tighten policies.
 
-## GitHub Pages vs shared data
+## Architecture
 
-**GitHub Pages only hosts static files** (HTML, CSS, JS). It cannot run Node.js or keep a `reports.db` file on the server for everyone to share.
+```
+Browser (GitHub Pages or local serve)
+    ↓ Supabase JS client (config.js + anon key)
+Supabase PostgreSQL
+```
 
-| Setup | Cross-device? |
-|--------|----------------|
-| **This project as-is** (`npm start` on your PC) | No — data stays on the machine where the server runs. Another phone/laptop only sees data if it talks to that same running server on your network. |
-| **GitHub Pages** (static hosting only) | No — there is no API or database; check-in/check-out would not save unless you rewrote the app to use a hosted backend. |
-| **Hosted backend** (e.g. Railway, Render, Fly.io + PostgreSQL/SQLite) | Yes — one database on the internet; any device with the URL can read/write the same reports. |
+There is **no Node server** in production. The old `reports.db` / Express setup has been replaced by Supabase.
 
-To use the same reports from multiple devices, you need a **always-on server** with a **central database**, not just the repo on GitHub Pages.
+## Calendar
+
+The **Calendar** page shows all kanban tasks on their **due date** in a month grid. Overdue days are highlighted; click a task chip to view or delete it (same modal as Kanban).

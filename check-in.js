@@ -42,7 +42,7 @@
     try {
       await saveCheckIn({ internName, workItems });
     } catch {
-      messageEl.textContent = 'Could not save check-in. Is the server running?';
+      messageEl.textContent = 'Could not save check-in. Check config.js and Supabase setup.';
       messageEl.classList.remove('hidden');
       return;
     }

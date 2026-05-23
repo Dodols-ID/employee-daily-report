@@ -1,4 +1,4 @@
-const API_BASE = '/api';
+let supabaseClient = null;
 
 function getTodayDateKey() {
   const now = new Date();
@@ -9,7 +9,7 @@ function getTodayDateKey() {
 }
 
 function formatDisplayDate(dateKey) {
-  const [y, m, d] = dateKey.split('-').map(Number);
+  const [y, m, d] = String(dateKey).split('-').map(Number);
   const date = new Date(y, m - 1, d);
   return date.toLocaleDateString(undefined, {
     weekday: 'long',
@@ -27,55 +27,211 @@ function formatTimestamp(isoString) {
   });
 }
 
-async function apiJson(url, options = {}) {
-  const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || res.statusText);
+function normalizeDateKey(value) {
+  if (!value) return '';
+  return String(value).slice(0, 10);
+}
+
+function getSupabase() {
+  if (supabaseClient) return supabaseClient;
+
+  if (typeof supabase === 'undefined') {
+    throw new Error(
+      'Supabase library not loaded. Include the Supabase CDN script before db.js.'
+    );
   }
-  if (res.status === 204) return null;
-  return res.json();
+
+  if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+    throw new Error(
+      'Supabase is not configured. Copy config.example.js to config.js and set your keys.'
+    );
+  }
+
+  if (
+    window.SUPABASE_URL.includes('YOUR_PROJECT') ||
+    window.SUPABASE_ANON_KEY.includes('YOUR_ANON')
+  ) {
+    throw new Error('Replace the placeholder values in config.js with your Supabase keys.');
+  }
+
+  supabaseClient = supabase.createClient(
+    window.SUPABASE_URL,
+    window.SUPABASE_ANON_KEY
+  );
+  return supabaseClient;
+}
+
+async function supabaseRequest(run) {
+  const { data, error } = await run(getSupabase());
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+function mapCheckIn(row) {
+  return {
+    id: row.id,
+    internName: row.intern_name,
+    workItems: row.work_items,
+    submittedAt: row.submitted_at,
+  };
+}
+
+function mapCheckOut(row) {
+  return {
+    id: row.id,
+    internName: row.intern_name,
+    done: row.done,
+    blocked: row.blocked,
+    notes: row.notes,
+    submittedAt: row.submitted_at,
+  };
+}
+
+function mapKanbanTask(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    dueDate: normalizeDateKey(row.due_date),
+    status: row.status,
+    department: row.department,
+    createdAt: row.created_at,
+  };
 }
 
 async function saveCheckIn(entry) {
-  const result = await apiJson(`${API_BASE}/check-ins`, {
-    method: 'POST',
-    body: JSON.stringify({
-      dateKey: getTodayDateKey(),
-      internName: entry.internName,
-      workItems: entry.workItems,
-    }),
-  });
-  return result.dateKey;
+  const dateKey = getTodayDateKey();
+  const id = crypto.randomUUID();
+  const submittedAt = new Date().toISOString();
+
+  await supabaseRequest((client) =>
+    client.from('check_ins').insert({
+      id,
+      date_key: dateKey,
+      intern_name: entry.internName,
+      work_items: entry.workItems,
+      submitted_at: submittedAt,
+    })
+  );
+
+  return dateKey;
 }
 
 async function saveCheckOut(entry) {
-  const result = await apiJson(`${API_BASE}/check-outs`, {
-    method: 'POST',
-    body: JSON.stringify({
-      dateKey: getTodayDateKey(),
-      internName: entry.internName,
+  const dateKey = getTodayDateKey();
+  const id = crypto.randomUUID();
+  const submittedAt = new Date().toISOString();
+
+  await supabaseRequest((client) =>
+    client.from('check_outs').insert({
+      id,
+      date_key: dateKey,
+      intern_name: entry.internName,
       done: entry.done,
       blocked: entry.blocked,
       notes: entry.notes,
-    }),
-  });
-  return result.dateKey;
+      submitted_at: submittedAt,
+    })
+  );
+
+  return dateKey;
 }
 
 async function getAllDateKeys() {
-  return apiJson(`${API_BASE}/dates`);
+  const [checkIns, checkOuts] = await Promise.all([
+    supabaseRequest((client) => client.from('check_ins').select('date_key')),
+    supabaseRequest((client) => client.from('check_outs').select('date_key')),
+  ]);
+
+  const keys = new Set();
+  checkIns.forEach((row) => keys.add(normalizeDateKey(row.date_key)));
+  checkOuts.forEach((row) => keys.add(normalizeDateKey(row.date_key)));
+  return [...keys].sort();
 }
 
 async function getDayData(dateKey) {
-  return apiJson(`${API_BASE}/days/${encodeURIComponent(dateKey)}`);
+  const [checkIns, checkOuts] = await Promise.all([
+    supabaseRequest((client) =>
+      client
+        .from('check_ins')
+        .select('*')
+        .eq('date_key', dateKey)
+        .order('submitted_at', { ascending: true })
+    ),
+    supabaseRequest((client) =>
+      client
+        .from('check_outs')
+        .select('*')
+        .eq('date_key', dateKey)
+        .order('submitted_at', { ascending: true })
+    ),
+  ]);
+
+  return {
+    checkIns: checkIns.map(mapCheckIn),
+    checkOuts: checkOuts.map(mapCheckOut),
+  };
 }
 
 async function deleteDay(dateKey) {
-  return apiJson(`${API_BASE}/days/${encodeURIComponent(dateKey)}`, {
-    method: 'DELETE',
-  });
+  await supabaseRequest((client) =>
+    client.from('check_ins').delete().eq('date_key', dateKey)
+  );
+  await supabaseRequest((client) =>
+    client.from('check_outs').delete().eq('date_key', dateKey)
+  );
+}
+
+async function getKanbanTasks() {
+  const rows = await supabaseRequest((client) =>
+    client
+      .from('kanban_tasks')
+      .select('*')
+      .order('due_date', { ascending: true })
+      .order('created_at', { ascending: true })
+  );
+  return rows.map(mapKanbanTask);
+}
+
+async function getKanbanTask(id) {
+  const rows = await supabaseRequest((client) =>
+    client.from('kanban_tasks').select('*').eq('id', id).limit(1)
+  );
+  if (!rows.length) throw new Error('Task not found');
+  return mapKanbanTask(rows[0]);
+}
+
+async function saveKanbanTasks(tasks) {
+  const createdAt = new Date().toISOString();
+  const rows = tasks.map((task) => ({
+    id: crypto.randomUUID(),
+    title: task.title,
+    due_date: task.dueDate,
+    status: task.status,
+    department: task.department,
+    created_at: createdAt,
+  }));
+
+  const inserted = await supabaseRequest((client) =>
+    client.from('kanban_tasks').insert(rows).select('*')
+  );
+
+  return inserted.map(mapKanbanTask);
+}
+
+async function updateKanbanTaskStatus(id, status) {
+  const rows = await supabaseRequest((client) =>
+    client
+      .from('kanban_tasks')
+      .update({ status })
+      .eq('id', id)
+      .select('*')
+  );
+  if (!rows.length) throw new Error('Task not found');
+  return mapKanbanTask(rows[0]);
+}
+
+async function deleteKanbanTask(id) {
+  await supabaseRequest((client) =>
+    client.from('kanban_tasks').delete().eq('id', id)
+  );
 }

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendar — Daily Intern Report</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="calendar-body">
+  <header class="site-header">
+    <nav class="nav nav-wide">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="check-in.html" class="nav-link">Check-in</a>
+      <a href="check-out.html" class="nav-link">Check-out</a>
+      <a href="kanban.html" class="nav-link">Kanban</a>
+      <a href="calendar.html" class="nav-link active">Calendar</a>
+    </nav>
+  </header>
+
+  <main class="calendar-page">
+    <h1>Task Calendar</h1>
+    <p class="subtitle">Kanban tasks by due date. Click a task for details.</p>
+
+    <div class="calendar-toolbar">
+      <button type="button" id="cal-prev" class="btn btn-secondary" aria-label="Previous month">&larr;</button>
+      <h2 id="cal-month-label" class="calendar-month-label"></h2>
+      <button type="button" id="cal-next" class="btn btn-secondary" aria-label="Next month">&rarr;</button>
+      <button type="button" id="cal-today" class="btn btn-secondary">Today</button>
+    </div>
+
+    <div class="calendar-grid" id="calendar-grid" aria-live="polite">
+      <div class="calendar-weekdays">
+        <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+      </div>
+      <div id="calendar-days" class="calendar-days"></div>
+    </div>
+  </main>
+
+  <div id="task-modal-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="task-modal-title">
+    <div class="modal modal--task">
+      <button type="button" class="modal-close" id="task-modal-close" aria-label="Close task">&times;</button>
+      <h2 id="task-modal-title" class="modal-title"></h2>
+      <div id="task-modal-body" class="task-modal-body"></div>
+      <div class="modal-actions">
+        <button type="button" id="task-modal-delete" class="btn-delete">Delete task</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="db.js"></script>
+  <script src="calendar.js"></script>
+</body>
+</html>
