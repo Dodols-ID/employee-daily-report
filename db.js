@@ -1,5 +1,34 @@
 let supabaseClient = null;
 
+/** In-memory auth storage — avoids SecurityError when localStorage is blocked. */
+const memoryAuthStorage = (() => {
+  const store = new Map();
+  return {
+    getItem: (key) => store.get(key) ?? null,
+    setItem: (key, value) => {
+      store.set(key, value);
+    },
+    removeItem: (key) => {
+      store.delete(key);
+    },
+  };
+})();
+
+function newId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    try {
+      return crypto.randomUUID();
+    } catch {
+      /* fall through — insecure context (file://, some HTTP hosts) */
+    }
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 function getTodayDateKey() {
   const now = new Date();
   const y = now.getFullYear();
@@ -32,6 +61,15 @@ function normalizeDateKey(value) {
   return String(value).slice(0, 10);
 }
 
+function normalizeSupabaseUrl(url) {
+  let base = String(url).trim().replace(/\/+$/, '');
+  base = base.replace(/\/rest\/v1$/i, '');
+  if (!base.startsWith('http')) {
+    throw new Error('SUPABASE_URL must start with https://');
+  }
+  return base;
+}
+
 function getSupabase() {
   if (supabaseClient) return supabaseClient;
 
@@ -55,16 +93,53 @@ function getSupabase() {
   }
 
   supabaseClient = supabase.createClient(
-    window.SUPABASE_URL,
-    window.SUPABASE_ANON_KEY
+    normalizeSupabaseUrl(window.SUPABASE_URL),
+    window.SUPABASE_ANON_KEY.trim(),
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+        storage: memoryAuthStorage,
+      },
+    }
   );
   return supabaseClient;
 }
 
+function wrapSecurityError(err) {
+  if (err instanceof DOMException && err.name === 'SecurityError') {
+    const hints = [];
+    if (window.location.protocol === 'file:') {
+      hints.push('Open the site via http://localhost (use start.bat), not by double-clicking HTML files.');
+    } else if (
+      window.location.protocol === 'http:' &&
+      window.location.hostname !== 'localhost' &&
+      window.location.hostname !== '127.0.0.1'
+    ) {
+      hints.push('Use https:// or open via http://localhost:3000.');
+    }
+    hints.push('Allow storage/cookies for this site, or disable strict tracking protection.');
+    hints.push('Check the browser console Network tab for blocked requests to supabase.co.');
+    return new Error(`SecurityError: ${err.message}. ${hints.join(' ')}`);
+  }
+  return err;
+}
+
 async function supabaseRequest(run) {
-  const { data, error } = await run(getSupabase());
-  if (error) throw new Error(error.message);
-  return data;
+  try {
+    const { data, error } = await run(getSupabase());
+    if (error) {
+      const hint =
+        error.code === 'PGRST205' || /relation.*does not exist/i.test(error.message)
+          ? ' Run supabase/schema.sql in the Supabase SQL Editor.'
+          : '';
+      throw new Error(error.message + hint);
+    }
+    return data;
+  } catch (err) {
+    throw wrapSecurityError(err);
+  }
 }
 
 function mapCheckIn(row) {
@@ -100,7 +175,7 @@ function mapKanbanTask(row) {
 
 async function saveCheckIn(entry) {
   const dateKey = getTodayDateKey();
-  const id = crypto.randomUUID();
+  const id = newId();
   const submittedAt = new Date().toISOString();
 
   await supabaseRequest((client) =>
@@ -118,7 +193,7 @@ async function saveCheckIn(entry) {
 
 async function saveCheckOut(entry) {
   const dateKey = getTodayDateKey();
-  const id = crypto.randomUUID();
+  const id = newId();
   const submittedAt = new Date().toISOString();
 
   await supabaseRequest((client) =>
@@ -203,7 +278,7 @@ async function getKanbanTask(id) {
 async function saveKanbanTasks(tasks) {
   const createdAt = new Date().toISOString();
   const rows = tasks.map((task) => ({
-    id: crypto.randomUUID(),
+    id: newId(),
     title: task.title,
     due_date: task.dueDate,
     status: task.status,

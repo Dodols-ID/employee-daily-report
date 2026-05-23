@@ -101,9 +101,9 @@
     let dates;
     try {
       dates = await getAllDateKeys();
-    } catch {
+    } catch (err) {
       dateList.innerHTML = '';
-      emptyState.textContent = 'Could not load reports. Check config.js and Supabase setup.';
+      emptyState.textContent = `Could not load reports: ${err.message}`;
       emptyState.classList.remove('hidden');
       return;
     }

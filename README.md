@@ -17,7 +17,7 @@ A static web app for intern daily reports and a kanban task board. **All data is
 1. Sign up at [supabase.com](https://supabase.com) and create a project.
 2. Open **SQL Editor** and run the full script in [`supabase/schema.sql`](supabase/schema.sql).
 3. In **Project Settings → API**, copy:
-   - **Project URL**
+   - **Project URL** — e.g. `https://xxxxx.supabase.co` (not the REST URL ending in `/rest/v1/`)
    - **anon public** key (safe for the browser)
 
 ### 2. Local config
@@ -85,3 +85,17 @@ There is **no Node server** in production. The old `reports.db` / Express setup 
 ## Calendar
 
 The **Calendar** page shows all kanban tasks on their **due date** in a month grid. Overdue days are highlighted; click a task chip to view or delete it (same modal as Kanban).
+
+## Troubleshooting
+
+### `SecurityError: The request was denied`
+
+Usually **not** a wrong API key. Common causes:
+
+1. **Opening HTML files directly** (`file://`) — use `start.bat` or `npm run serve` and open `http://localhost:3000`.
+2. **Browser privacy settings** blocking storage or cross-site requests — relax tracking protection for your site, or try another browser.
+3. **Wrong Supabase URL** — use **Project URL** (`https://xxx.supabase.co`), not `.../rest/v1/`.
+4. **GitHub Pages secrets** — `SUPABASE_URL` must be the Project URL; re-deploy after fixing secrets.
+5. **Supabase project paused** — resume the project in the Supabase dashboard (free tier pauses inactive projects).
+
+Check **Developer tools → Console** and **Network** for the exact failing request.
