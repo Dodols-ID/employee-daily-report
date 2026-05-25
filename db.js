@@ -421,3 +421,31 @@ async function saveHabitLog(habitId, entry) {
   );
   return mapHabitLog(inserted[0]);
 }
+
+/** Expose API on window so habits.js and other pages can call them reliably. */
+Object.assign(window, {
+  getTodayDateKey,
+  formatDisplayDate,
+  formatTimestamp,
+  normalizeDateKey,
+  getHabitLogDateKey,
+  isHabitSubmissionWindowOpen,
+  saveCheckIn,
+  saveCheckOut,
+  getAllDateKeys,
+  getDayData,
+  deleteDay,
+  getKanbanTasks,
+  getKanbanTask,
+  saveKanbanTasks,
+  updateKanbanTaskStatus,
+  deleteKanbanTask,
+  getHabits,
+  getHabit,
+  saveHabits,
+  saveHabit: saveHabits,
+  deleteHabit,
+  getHabitLogs,
+  getHabitLog,
+  saveHabitLog,
+});
