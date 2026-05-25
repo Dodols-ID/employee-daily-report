@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habits — Daily Intern Report</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="habits-body">
+  <header class="site-header">
+    <nav class="nav nav-wide">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="check-in.html" class="nav-link">Check-in</a>
+      <a href="check-out.html" class="nav-link">Check-out</a>
+      <a href="kanban.html" class="nav-link">Kanban</a>
+      <a href="calendar.html" class="nav-link">Calendar</a>
+      <a href="habits.html" class="nav-link active">Habits</a>
+    </nav>
+  </header>
+
+  <main class="habits-page">
+    <h1>Habit Tracker</h1>
+    <p class="subtitle">One log per habit per day. Submit before 11:59 PM; a new day starts at midnight.</p>
+    <ul id="habit-list" class="habit-list" aria-live="polite"></ul>
+    <p id="habits-empty" class="empty-state hidden">No habits yet. Add habits with the button below.</p>
+  </main>
+
+  <aside class="kanban-dock habits-dock" aria-label="Add habits">
+    <button type="button" id="habits-dock-toggle" class="kanban-dock-toggle" aria-expanded="false" aria-controls="habits-add-panel">
+      + Add habits
+    </button>
+    <div id="habits-add-panel" class="kanban-add-panel hidden">
+      <h2 class="kanban-add-title">New habits</h2>
+      <form id="habits-add-form" class="kanban-add-form">
+        <div id="habit-rows" class="task-rows"></div>
+        <button type="button" id="add-habit-row" class="btn btn-secondary">+ Work</button>
+        <button type="submit" class="btn btn-primary">Add habits</button>
+      </form>
+      <p id="habits-add-message" class="form-message hidden" role="status"></p>
+    </div>
+  </aside>
+
+  <div id="habit-detail-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="habit-detail-title">
+    <div class="modal modal--habit">
+      <button type="button" class="modal-close" id="habit-detail-close" aria-label="Close">&times;</button>
+      <h2 id="habit-detail-title" class="modal-title"></h2>
+      <div class="habit-detail-body">
+        <div class="habit-stats" id="habit-stats"></div>
+        <div class="habit-mini-cal-wrap">
+          <div class="habit-mini-cal-toolbar">
+            <button type="button" id="habit-cal-prev" class="btn btn-secondary btn-sm" aria-label="Previous month">&larr;</button>
+            <span id="habit-cal-label" class="habit-cal-label"></span>
+            <button type="button" id="habit-cal-next" class="btn btn-secondary btn-sm" aria-label="Next month">&rarr;</button>
+          </div>
+          <div class="habit-mini-cal" id="habit-mini-cal"></div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="habit-detail-delete" class="btn-delete">Delete habit</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="habit-log-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="habit-log-title">
+    <div class="modal modal--habit-log">
+      <button type="button" class="modal-close" id="habit-log-close" aria-label="Close">&times;</button>
+      <h2 id="habit-log-title" class="modal-title">Today's log</h2>
+      <form id="habit-log-form" class="form habit-log-form">
+        <input type="hidden" id="habit-log-habit-id" name="habitId">
+        <input type="hidden" id="habit-log-date" name="logDate">
+        <div class="form-group">
+          <label for="habit-whats-done">What's done</label>
+          <textarea id="habit-whats-done" name="whatsDone" required rows="3" placeholder="What did you accomplish?"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="habit-duration">For how long</label>
+          <input type="text" id="habit-duration" name="duration" required placeholder="e.g. 30 min, 1.5 hours">
+        </div>
+        <div class="form-group">
+          <label for="habit-improve">What to improve</label>
+          <textarea id="habit-improve" name="whatToImprove" rows="2" placeholder="What could be better tomorrow?"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit log</button>
+      </form>
+      <p id="habit-log-message" class="form-message hidden" role="status"></p>
+    </div>
+  </div>
+
+  <div id="habit-day-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="habit-day-title">
+    <div class="modal modal--task">
+      <button type="button" class="modal-close" id="habit-day-close" aria-label="Close">&times;</button>
+      <h2 id="habit-day-title" class="modal-title"></h2>
+      <div id="habit-day-body" class="task-modal-body"></div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="db.js"></script>
+  <script src="habits.js"></script>
+</body>
+</html>

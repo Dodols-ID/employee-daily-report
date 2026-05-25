@@ -310,3 +310,114 @@ async function deleteKanbanTask(id) {
     client.from('kanban_tasks').delete().eq('id', id)
   );
 }
+
+/** Habit day ends at 23:59 local — after that, today's log window is closed. */
+function getHabitLogDateKey() {
+  return getTodayDateKey();
+}
+
+function isHabitSubmissionWindowOpen() {
+  const now = new Date();
+  return !(now.getHours() === 23 && now.getMinutes() >= 59);
+}
+
+function mapHabit(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    createdAt: row.created_at,
+  };
+}
+
+function mapHabitLog(row) {
+  return {
+    id: row.id,
+    habitId: row.habit_id,
+    logDate: normalizeDateKey(row.log_date),
+    whatsDone: row.whats_done,
+    durationMinutes: row.duration_minutes,
+    whatToImprove: row.what_to_improve,
+    submittedAt: row.submitted_at,
+  };
+}
+
+async function getHabits() {
+  const rows = await supabaseRequest((client) =>
+    client.from('habits').select('*').order('created_at', { ascending: true })
+  );
+  return rows.map(mapHabit);
+}
+
+async function getHabit(id) {
+  const rows = await supabaseRequest((client) =>
+    client.from('habits').select('*').eq('id', id).limit(1)
+  );
+  if (!rows.length) throw new Error('Habit not found');
+  return mapHabit(rows[0]);
+}
+
+async function saveHabits(habits) {
+  const createdAt = new Date().toISOString();
+  const rows = habits.map((h) => ({
+    id: newId(),
+    name: h.name,
+    created_at: createdAt,
+  }));
+  const inserted = await supabaseRequest((client) =>
+    client.from('habits').insert(rows).select('*')
+  );
+  return inserted.map(mapHabit);
+}
+
+async function deleteHabit(id) {
+  await supabaseRequest((client) => client.from('habits').delete().eq('id', id));
+}
+
+async function getHabitLogs(habitId) {
+  const rows = await supabaseRequest((client) =>
+    client
+      .from('habit_logs')
+      .select('*')
+      .eq('habit_id', habitId)
+      .order('log_date', { ascending: true })
+  );
+  return rows.map(mapHabitLog);
+}
+
+async function getHabitLog(habitId, logDate) {
+  const rows = await supabaseRequest((client) =>
+    client
+      .from('habit_logs')
+      .select('*')
+      .eq('habit_id', habitId)
+      .eq('log_date', logDate)
+      .limit(1)
+  );
+  return rows.length ? mapHabitLog(rows[0]) : null;
+}
+
+async function saveHabitLog(habitId, entry) {
+  const logDate = entry.logDate || getHabitLogDateKey();
+  const existing = await getHabitLog(habitId, logDate);
+  if (existing) {
+    throw new Error('Already logged for this day. One submission per day.');
+  }
+  if (logDate === getHabitLogDateKey() && !isHabitSubmissionWindowOpen()) {
+    throw new Error('Submission window closed for today (after 11:59 PM).');
+  }
+
+  const row = {
+    id: newId(),
+    habit_id: habitId,
+    log_date: logDate,
+    whats_done: entry.whatsDone,
+    duration_minutes: entry.durationMinutes,
+    what_to_improve: entry.whatToImprove ?? '',
+    submitted_at: new Date().toISOString(),
+  };
+
+  const inserted = await supabaseRequest((client) =>
+    client.from('habit_logs').insert(row).select('*')
+  );
+  return mapHabitLog(inserted[0]);
+}

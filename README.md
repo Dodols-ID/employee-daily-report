@@ -9,13 +9,14 @@ A static web app for intern daily reports and a kanban task board. **All data is
 - **Check-out** — End-of-day summary
 - **Kanban** — Current / Urgent / Waiting columns with drag-and-drop
 - **Calendar** — Month view of kanban tasks by due date
+- **Habits** — Habit tracker with daily logs, streaks, and mini calendar
 
 ## Setup (one time)
 
 ### 1. Create a Supabase project
 
 1. Sign up at [supabase.com](https://supabase.com) and create a project.
-2. Open **SQL Editor** and run the full script in [`supabase/schema.sql`](supabase/schema.sql).
+2. Open **SQL Editor** and run the full script in [`supabase/schema.sql`](supabase/schema.sql). If you already ran it before, run only the new `habits` / `habit_logs` section at the bottom of the file.
 3. In **Project Settings → API**, copy:
    - **Project URL** — e.g. `https://xxxxx.supabase.co` (not the REST URL ending in `/rest/v1/`)
    - **anon public** key (safe for the browser)
@@ -69,6 +70,8 @@ Your site will be at `https://<username>.github.io/<repo-name>/`.
 | `check_ins` | Daily check-ins (`date_key`, `intern_name`, `work_items` JSON) |
 | `check_outs` | Daily check-outs (`done`, `blocked`, `notes`) |
 | `kanban_tasks` | Tasks (`title`, `due_date`, `status`, `department`) |
+| `habits` | Habit names |
+| `habit_logs` | Daily logs (`whats_done`, `duration_minutes`, `what_to_improve`) — one per habit per day |
 
 Row-level security is open for read/write (suitable for a small internal team). For production, add Supabase Auth and tighten policies.
 

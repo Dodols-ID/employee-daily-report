@@ -50,3 +50,35 @@ create policy "Public read write check_outs"
 
 create policy "Public read write kanban_tasks"
   on kanban_tasks for all using (true) with check (true);
+
+create table if not exists habits (
+  id uuid primary key,
+  name text not null,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists habit_logs (
+  id uuid primary key,
+  habit_id uuid not null references habits (id) on delete cascade,
+  log_date date not null,
+  whats_done text not null,
+  duration_minutes integer not null default 0,
+  what_to_improve text not null default '',
+  submitted_at timestamptz not null default now(),
+  unique (habit_id, log_date)
+);
+
+create index if not exists idx_habit_logs_habit on habit_logs (habit_id);
+create index if not exists idx_habit_logs_date on habit_logs (log_date);
+
+alter table habits enable row level security;
+alter table habit_logs enable row level security;
+
+drop policy if exists "Public read write habits" on habits;
+drop policy if exists "Public read write habit_logs" on habit_logs;
+
+create policy "Public read write habits"
+  on habits for all using (true) with check (true);
+
+create policy "Public read write habit_logs"
+  on habit_logs for all using (true) with check (true);
